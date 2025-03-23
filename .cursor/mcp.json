@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "bmi-mcp-local": {
+      "command": "python",
+      "args": ["/home/ppitonak/workspace/ai-playground/bmi-mcp.py"]
+    }
+  }
+}
