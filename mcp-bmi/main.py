@@ -3,7 +3,7 @@ from mcp.server.fastmcp import FastMCP
 mcp = FastMCP("My BMI Server")
 
 @mcp.tool()
-def calculate_bmi(weight_kg: float, height_m: float) -> float:
+def calculate_bmi_local(weight_kg: float, height_m: float) -> float:
     """Calculate the Body Mass Index (BMI) of a person.
     
     Args:
