@@ -1,0 +1,192 @@
+commit 579fe684ce5500480bf7561d27b7a3ac9bbc7c88
+Author: Andrew Thorp <athorp@redhat.com>
+Date:   Wed Mar 12 13:59:23 2025 -0400
+
+    fix: Fix remote task params default-value substitution
+    
+    Fixes #8637
+    
+    When substituting Params in a StepAction was initially implemented, the
+    defaults were taken from the `TaskRun.Spec.TaskSpec.Params`. This works
+    when the Task is defined in place, however if the TaskRun does not
+    define the Task inline and instead references a remote Task from
+    `TaskRun.Spec.TaskRef`, then any param defaults failed to be applied.
+    
+    When `GetStepActionFunc` is called from the TaskRun reconciler, it's
+    passed a TaskSpec which comes from either the `TaskRun.Spec.TaskSpec` or
+    a remotely-resolved TaskRef. By checking this TaskSpec for the Param
+    defaults, instead of `TaskRun.Spec.TaskSpec`, we can ensure the defaults
+    will always be applied when they're specified
+
+commit 002f74eea37b0f5dbcfed39c13d7cd762c8fcdc4
+Author: Vincent Demeester <vdemeest@redhat.com>
+Date:   Wed Feb 19 15:21:03 2025 +0100
+
+    feat(ci): add comprehensive CI workflow
+    
+    This commit introduces a new CI workflow in `.github/workflows/ci.yaml` that
+    handles build, linting, testing, and calls the e2e workflows. It optimizes
+    the CI pipeline by including caching mechanisms and consolidates previously
+    separate workflows.
+    
+    The following changes have been made:
+    * Added a multi-stage CI workflow named `ci`.
+    * Introduced linting steps using tools like `gofmt`, `golangci-lint`,
+      `yamllint` and `go-license` check.
+    * Incorporated build, unit tests, and generated code verification.
+    * Added a multi-arch build support configuration.
+    * Consolidated end-to-end tests via a workflow call in `e2e-matrix.yml`.
+    
+    Additionally, the redundant `golangci-lint.yaml` workflow has been removed.
+    Support for a new test target `test-unit-verbose-and-race` is introduced in
+    the `Makefile`, and the Go toolchain in `go.mod` is updated from `go 1.22.3`
+    to `go 1.22.7`.
+    
+    Signed-off-by: Vincent Demeester <vdemeest@redhat.com>
+    (cherry picked from commit fe892bf500686ce9d2ec22468998075a25e1da5a)
+
+commit 286089a11ee5daff9a5585c0e0dd5876b1e75828
+Author: qingliu <qingliu@alauda.io>
+Date:   Thu Jan 2 17:09:55 2025 +0800
+
+    fix: avoid panic when validate enum param with special matrix task
+    
+    fix #8464
+    
+    If the matrix Task has no TaskRun to execute, the `ResolvedTask` will be
+    nil, we should skip the validation.
+
+commit 4a58d0ea43062e3bb3dfa4c5373537cf7b996772
+Author: Vincent Demeester <vdemeest@redhat.com>
+Date:   Fri Jan 3 12:50:30 2025 +0100
+
+    .github/workflows: run on the "current" pull_request
+    
+    Signed-off-by: Vincent Demeester <vdemeest@redhat.com>
+
+commit f49d7ed93e3be964d47bde23042b4ed4d918b5d2
+Author: Vincent Demeester <vdemeest@redhat.com>
+Date:   Fri Dec 20 08:19:12 2024 +0100
+
+    .github/workflows: backport e2e workflows
+    
+    This commit backports the e2e workflows from the mani branch as we
+    move from prow jobs to these.
+    
+    Signed-off-by: Vincent Demeester <vdemeest@redhat.com>
+
+commit 8bfd3273cbe7776847884d7fa5004481e6be8f4a
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Thu Dec 12 14:12:52 2024 +0000
+
+    build(deps): bump golang.org/x/crypto from 0.26.0 to 0.31.0
+    
+    Bumps [golang.org/x/crypto](https://github.com/golang/crypto) from 0.26.0 to 0.31.0.
+    - [Commits](https://github.com/golang/crypto/compare/v0.26.0...v0.31.0)
+
+commit acb6211a2042372032f866092c938bac2cb90721
+Author: PuneetPunamiya <ppunamiy@redhat.com>
+Date:   Tue Nov 26 12:51:06 2024 +0530
+
+    Fixes git-resolver configuration for serverUrl and scmType
+    
+    With the latest support for multiple git providers in git-resolvers,
+    it was having a regression issue where if value serverUrl was not given
+    then it used to return an error
+    
+    Hence this patch fixes the issue to avoid regression
+    
+    Signed-off-by: PuneetPunamiya <ppunamiy@redhat.com>
+
+commit 4e8eec7e90ecd638f0ffb24a8c05cc345e93f5af
+Author: Marcus Noble <github@marcusnoble.co.uk>
+Date:   Thu Nov 21 08:54:28 2024 +0100
+
+    fix: add missing stepaction RBAC permission for resolver
+    
+    Signed-off-by: Marcus Noble <github@marcusnoble.co.uk>
+
+commit 7b76131b656adca53b12c6bf0f07b7ee97a656df
+Author: Vincent Demeester <vdemeest@redhat.com>
+Date:   Mon Nov 18 15:56:03 2024 +0100
+
+    Use io.ReadFull to read the bundle content
+    
+    The io.Reader documentation says:
+    
+    > Read reads up to len(p) bytes into p. It returns the number of bytes
+    > read (0 <= n <= len(p)) and any error encountered. ... If some data is
+    > available but not len(p) bytes, Read conventionally returns what is
+    > available instead of waiting for more.
+    
+    Read is not guaranteed to fill the data argument. Use io.ReadFull to
+    fill the buffer.
+    
+    In some cases (a relatively big bundle), the bundle content was not
+    completely read and it would fail to parse. Using `io.ReadFull` fixes
+    the issue.
+    
+    Signed-off-by: Vincent Demeester <vdemeest@redhat.com>
+
+commit 9664cb4bf530c24588428b48e8c0f71ef9ba3564
+Author: Marcus Noble <github@marcusnoble.co.uk>
+Date:   Mon Nov 11 06:12:33 2024 -0700
+
+    Fix StepAction support in Cluster resolver
+    
+    Signed-off-by: Marcus Noble <github@marcusnoble.co.uk>
+
+commit 58910a4910efd2a4c16ab857fc7ad08da37b961b
+Author: divyansh42 <diagrawa@redhat.com>
+Date:   Wed Oct 30 15:26:49 2024 +0530
+
+    Fix number of completed and failed task in case of ValidationFailed
+    
+    Signed-off-by: divyansh42 <diagrawa@redhat.com>
+
+commit f32544af94eae3a6cd155d7a709d9d2df2f0de65
+Author: divyansh42 <diagrawa@redhat.com>
+Date:   Tue Oct 22 18:36:37 2024 +0530
+
+    Remove permanent error and improve skip logic
+    
+    Signed-off-by: divyansh42 <diagrawa@redhat.com>
+
+commit b762df226074596faefcb659fc1c762768db8853
+Author: divyansh42 <diagrawa@redhat.com>
+Date:   Wed Oct 16 20:12:40 2024 +0530
+
+    Exit reconcilation and markfailed if finally is not present
+    
+    Signed-off-by divyansh42 <diagrawa@redhat.com>
+
+commit 0f0eab9a5cea2e7678e4db62a0e3911d3a93fb48
+Author: divyansh42 <diagrawa@redhat.com>
+Date:   Wed Oct 16 15:47:18 2024 +0530
+
+    Resolve review comments 1
+    
+    Signed-off-by: divyansh42 <diagrawa@redhat.com>
+
+commit c6b45b875b10c98f3071f2ea36ff12a5d1af0ca7
+Author: divyansh42 <diagrawa@redhat.com>
+Date:   Mon Oct 7 18:31:48 2024 +0530
+
+    Run finally pipeline even if task is failed at the validation
+    
+    Presently if one of the task in pipeline is consuming result from the previous task
+    but the previous failed to produce the result then pipeline fails without running
+    the finally tasks. These changes handles tasks which got failed in the validation
+    step.
+    
+    Signed-off-by: divyansh42 <diagrawa@redhat.com>
+
+commit eb1e38a5cb6f233565c509c82bd3972a65922da2
+Author: Khurram Baig <kbaig@redhat.com>
+Date:   Thu Oct 24 06:57:50 2024 +0530
+
+    Expose Resolvers Controller performance tuning configurations
+    
+    This changes the resolvers controllers to start with a config.
+    We expose ThreadsPerController, QPS and Burst for performance
+    tuning as we do for pipelines controller.
